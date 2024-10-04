@@ -14,8 +14,8 @@ pub enum Value {
     Number(f64),
     String(String),
     Boolean(bool),
-    List(Vec<Value>),        // Hinzugefügt: List-Wert
-    Tuple(Vec<Value>),       // Hinzugefügt: Tuple-Wert
+    List(Vec<Value>),
+    Tuple(Vec<Value>),   // Stelle sicher, dass dies vorhanden ist
     Function {
         params: Vec<String>,
         body: Box<ASTNode>,
@@ -23,6 +23,7 @@ pub enum Value {
     ReturnValue(Box<Value>),
     Null,
 }
+
 
 impl Interpreter {
     pub fn new() -> Self {
@@ -44,7 +45,7 @@ impl Interpreter {
                 result
             }
             ASTNode::Block(statements) => {
-                let local_env = self.environment.clone(); // `mut` entfernt
+                let local_env = self.environment.clone();
                 let mut result = Value::Null;
                 for stmt in statements {
                     result = self.interpret(stmt);

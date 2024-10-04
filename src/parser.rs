@@ -194,7 +194,13 @@ impl Parser {
     }
 
     fn parse_block(&mut self) -> ASTNode {
-        self.expect(Token::Newline);
+        // Optionally consume one or more Newline tokens
+        while self.current_token == Token::Newline {
+            self.advance();
+        }
+
+        println!("Parser: Erwartet Indent, aktuelles Token: {:?}", self.current_token); // Debug-Ausgabe
+
         self.expect(Token::Indent);
 
         let mut statements = Vec::new();
@@ -211,6 +217,9 @@ impl Parser {
 
         ASTNode::Block(statements)
     }
+
+
+
 
     fn parse_expression(&mut self) -> ASTNode {
         self.parse_logic_or()
@@ -421,7 +430,6 @@ impl Parser {
                     }
                 }
                 self.expect(Token::RightParen);
-                // Unterschied zwischen Tupel und Parenthesized Ausdruck
                 if elements.len() == 1 {
                     elements[0].clone() // Kein Tupel, nur Ausdruck
                 } else {

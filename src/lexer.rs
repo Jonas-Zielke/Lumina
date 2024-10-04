@@ -38,10 +38,15 @@ impl Lexer {
         }
     }
 
-    pub fn next_token(&mut self) -> Token {
-        // Behandle Einrückungen und Ausrückungen
+   pub fn next_token(&mut self) -> Token {
+        // Behandle Einrückungen und Ausrückungen nach Newline
         if self.current_char == Some('\n') {
-            self.advance();
+            self.advance(); // Überspringe '\n'
+
+            // Überspringe '\r' falls vorhanden (für Windows)
+            if self.current_char == Some('\r') {
+                self.advance();
+            }
 
             let mut num_spaces = 0;
             while let Some(c) = self.current_char {
@@ -49,9 +54,14 @@ impl Lexer {
                     num_spaces += 1;
                     self.advance();
                 } else if c == '\n' {
-                    // Leere Zeile, num_spaces zurücksetzen
+                    // Leere Zeile, setze num_spaces zurück
                     num_spaces = 0;
                     self.advance();
+
+                    // Überspringe '\r' falls vorhanden
+                    if self.current_char == Some('\r') {
+                        self.advance();
+                    }
                 } else {
                     break;
                 }
@@ -61,18 +71,21 @@ impl Lexer {
 
             if num_spaces > current_indent {
                 self.indent_stack.push(num_spaces);
+                println!("Lexer: Indent"); // Debug-Ausgabe
                 return Token::Indent;
             } else if num_spaces < current_indent {
                 self.indent_stack.pop();
+                println!("Lexer: Dedent"); // Debug-Ausgabe
                 return Token::Dedent;
             } else {
+                println!("Lexer: Newline"); // Debug-Ausgabe
                 return Token::Newline;
             }
         }
 
         // Überspringe Leerzeichen (außer Newlines)
         while let Some(c) = self.current_char {
-            if c.is_whitespace() && c != '\n' {
+            if c.is_whitespace() && c != '\n' && c != '\r' {
                 self.advance();
             } else {
                 break;
@@ -84,6 +97,7 @@ impl Lexer {
             // Verarbeite verbleibende Dedents am EOF
             if self.indent_stack.len() > 1 {
                 self.indent_stack.pop();
+                println!("Lexer: Dedent"); // Debug-Ausgabe
                 return Token::Dedent;
             }
             return Token::EOF;
@@ -94,7 +108,7 @@ impl Lexer {
         // Behandle Kommentare
         if c == '#' {
             while let Some(c) = self.current_char {
-                if c == '\n' {
+                if c == '\n' || c == '\r' {
                     break;
                 }
                 self.advance();
@@ -103,8 +117,7 @@ impl Lexer {
         }
 
         // Behandle Newline
-        if c == '\n' {
-            // Sollte bereits verarbeitet sein
+        if c == '\n' || c == '\r' {
             self.advance();
             return Token::Newline;
         }
@@ -129,10 +142,14 @@ impl Lexer {
             if let Some('=') = self.peek_char() {
                 self.advance();
                 self.advance();
-                return Token::Operator("==".to_string());
+                let token = Token::Operator("==".to_string());
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                return token;
             } else {
                 self.advance();
-                return Token::Assign;
+                let token = Token::Assign;
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                return token;
             }
         }
 
@@ -140,10 +157,14 @@ impl Lexer {
             if let Some('=') = self.peek_char() {
                 self.advance();
                 self.advance();
-                return Token::Operator("!=".to_string());
+                let token = Token::Operator("!=".to_string());
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                return token;
             } else {
                 self.advance();
-                return Token::Not;
+                let token = Token::Not;
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                return token;
             }
         }
 
@@ -152,10 +173,14 @@ impl Lexer {
                 let op = format!("{}=", c);
                 self.advance();
                 self.advance();
-                return Token::Operator(op);
+                let token = Token::Operator(op);
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                return token;
             } else {
                 self.advance();
-                return Token::Operator(c.to_string());
+                let token = Token::Operator(c.to_string());
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                return token;
             }
         }
 
@@ -163,37 +188,51 @@ impl Lexer {
         match c {
             '+' | '-' | '*' | '/' | '%' => {
                 self.advance();
-                Token::Operator(c.to_string())
+                let token = Token::Operator(c.to_string());
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                token
             }
             '(' => {
                 self.advance();
-                Token::LeftParen
+                let token = Token::LeftParen;
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                token
             }
             ')' => {
                 self.advance();
-                Token::RightParen
+                let token = Token::RightParen;
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                token
             }
             '[' => { // Behandle LeftBracket
                 self.advance();
-                Token::LeftBracket
+                let token = Token::LeftBracket;
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                token
             }
             ']' => { // Behandle RightBracket
                 self.advance();
-                Token::RightBracket
+                let token = Token::RightBracket;
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                token
             }
             ',' => {
                 self.advance();
-                Token::Comma
+                let token = Token::Comma;
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                token
             }
             ':' => {
                 self.advance();
-                Token::Colon
+                let token = Token::Colon;
+                println!("Lexer: {:?}", token); // Debug-Ausgabe
+                token
             }
             _ => {
                 panic!("Unbekanntes Zeichen: {}", c);
             }
         }
-    }
+   }
 
     fn identifier(&mut self) -> Token {
         let mut result = String::new();

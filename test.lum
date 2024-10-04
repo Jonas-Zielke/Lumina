@@ -1,3 +1,22 @@
-# Definiere ein einfaches Tupel
+# Definiere eine Liste
+numbers = [1, 2, 3, 4, 5]
+print(numbers)
+
+# Definiere ein Tupel
 coordinates = (10, 20, 30)
 print(coordinates)
+
+# Liste innerhalb eines Tupels
+mixed = ([1, 2], (3, 4), "Hallo")
+print(mixed)
+
+# Kombinierte Operationen
+numbers = numbers + [6, 7]
+print(numbers)
+
+# Verwendung in Funktionen
+def create_tuple(a, b, c):
+    return (a, b, c)
+
+result = create_tuple(5, 10, 15)
+print(result)
