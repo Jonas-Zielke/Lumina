@@ -194,8 +194,7 @@ impl Parser {
     }
 
     fn parse_block(&mut self) -> ASTNode {
-    if self.current_token == Token::Newline {
-        self.advance(); // Newline überspringen
+        self.expect(Token::Newline);
         self.expect(Token::Indent);
 
         let mut statements = Vec::new();
@@ -211,13 +210,7 @@ impl Parser {
         self.expect(Token::Dedent);
 
         ASTNode::Block(statements)
-    } else {
-        // Einzeiler nach dem ':'
-        let stmt = self.parse_statement();
-        ASTNode::Block(vec![stmt])
     }
-}
-
 
     fn parse_expression(&mut self) -> ASTNode {
         self.parse_logic_or()
@@ -411,9 +404,46 @@ impl Parser {
             }
             Token::LeftParen => {
                 self.advance();
-                let expr = self.parse_expression();
+                let mut elements = Vec::new();
+                if self.current_token != Token::RightParen {
+                    loop {
+                        let expr = self.parse_expression();
+                        elements.push(expr);
+                        if self.current_token == Token::Comma {
+                            self.advance();
+                            // Optional: Erlaube trailing comma
+                            if self.current_token == Token::RightParen {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
                 self.expect(Token::RightParen);
-                expr
+                // Unterschied zwischen Tupel und Parenthesized Ausdruck
+                if elements.len() == 1 {
+                    elements[0].clone() // Kein Tupel, nur Ausdruck
+                } else {
+                    ASTNode::Tuple(elements)
+                }
+            }
+            Token::LeftBracket => { // Behandle Listen
+                self.advance(); // '['
+                let mut elements = Vec::new();
+                if self.current_token != Token::RightBracket {
+                    loop {
+                        let element = self.parse_expression();
+                        elements.push(element);
+                        if self.current_token == Token::Comma {
+                            self.advance();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                self.expect(Token::RightBracket);
+                ASTNode::List(elements)
             }
             _ => {
                 panic!("Unerwartetes Token in parse_atom: {:?}", self.current_token);

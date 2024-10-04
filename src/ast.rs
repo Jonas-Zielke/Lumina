@@ -4,7 +4,7 @@
 pub enum ASTNode {
     Program(Vec<ASTNode>),
     Statement(Box<ASTNode>),
-    Block(Vec<ASTNode>), // Hinzugefügt: Block-Knoten
+    Block(Vec<ASTNode>), // Bereits hinzugefügt
     Number(f64),
     String(String),
     Boolean(bool),
@@ -42,5 +42,7 @@ pub enum ASTNode {
     },
     Return(Box<ASTNode>),
     Print(Box<ASTNode>),
+    List(Vec<ASTNode>),    // Bereits hinzugefügt
+    Tuple(Vec<ASTNode>),   // Bereits hinzugefügt
     // Weitere Knoten können hier hinzugefügt werden
 }

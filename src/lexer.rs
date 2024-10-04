@@ -173,6 +173,14 @@ impl Lexer {
                 self.advance();
                 Token::RightParen
             }
+            '[' => { // Behandle LeftBracket
+                self.advance();
+                Token::LeftBracket
+            }
+            ']' => { // Behandle RightBracket
+                self.advance();
+                Token::RightBracket
+            }
             ',' => {
                 self.advance();
                 Token::Comma
