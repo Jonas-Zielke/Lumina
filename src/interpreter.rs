@@ -14,6 +14,8 @@ pub enum Value {
     Number(f64),
     String(String),
     Boolean(bool),
+    List(Vec<Value>),
+    Tuple(Vec<Value>),   // Stelle sicher, dass dies vorhanden ist
     Function {
         params: Vec<String>,
         body: Box<ASTNode>,
@@ -21,6 +23,7 @@ pub enum Value {
     ReturnValue(Box<Value>),
     Null,
 }
+
 
 impl Interpreter {
     pub fn new() -> Self {
@@ -42,8 +45,8 @@ impl Interpreter {
                 result
             }
             ASTNode::Block(statements) => {
-                let mut result = Value::Null;
                 let local_env = self.environment.clone();
+                let mut result = Value::Null;
                 for stmt in statements {
                     result = self.interpret(stmt);
                     if let Value::ReturnValue(_) = result {
@@ -137,19 +140,35 @@ impl Interpreter {
                 println!("{}", self.value_to_string(&val));
                 Value::Null
             }
+            ASTNode::List(elements) => {
+                let mut list = Vec::new();
+                for elem in elements {
+                    list.push(self.interpret(elem));
+                }
+                Value::List(list)
+            }
+            ASTNode::Tuple(elements) => {
+                let mut tuple = Vec::new();
+                for elem in elements {
+                    tuple.push(self.interpret(elem));
+                }
+                Value::Tuple(tuple)
+            }
         }
     }
 
     fn evaluate_binary_op(&self, left: &Value, operator: &str, right: &Value) -> Value {
         match operator {
             "+" => {
-                if let (Value::Number(l), Value::Number(r)) = (left, right) {
-                    Value::Number(l + r)
-                } else if let (Value::String(l), Value::String(r)) = (left, right) {
-                    Value::String(l.clone() + r)
-                } else {
-                    panic!("Ungültiger Operandentyp für '+': {:?} und {:?}", left, right);
-                }
+                match (left, right) {
+                (Value::Number(l), Value::Number(r)) => Value::Number(l + r),
+                (Value::String(l), Value::String(r)) => Value::String(l.clone() + r),
+                (Value::List(l), Value::List(r)) => Value::List([l.clone(), r.clone()].concat()),
+                // Optionale Unterstützung für Tupel-Konkatenation
+                (Value::Tuple(l), Value::Tuple(r)) => Value::Tuple([l.clone(), r.clone()].concat()),
+                _ => panic!("Ungültiger Operandentyp für '+': {:?} und {:?}", left, right),
+            }
+
             }
             "-" => {
                 if let (Value::Number(l), Value::Number(r)) = (left, right) {
@@ -250,6 +269,8 @@ impl Interpreter {
             Value::Boolean(b) => *b,
             Value::Number(n) => *n != 0.0,
             Value::String(s) => !s.is_empty(),
+            Value::List(l) => !l.is_empty(),
+            Value::Tuple(t) => !t.is_empty(),
             Value::Null => false,
             _ => true,
         }
@@ -260,6 +281,14 @@ impl Interpreter {
             Value::Number(n) => n.to_string(),
             Value::String(s) => s.clone(),
             Value::Boolean(b) => b.to_string(),
+            Value::List(l) => {
+                let elements: Vec<String> = l.iter().map(|v| self.value_to_string(v)).collect();
+                format!("[{}]", elements.join(", "))
+            }
+            Value::Tuple(t) => {
+                let elements: Vec<String> = t.iter().map(|v| self.value_to_string(v)).collect();
+                format!("({})", elements.join(", "))
+            }
             Value::Null => "null".to_string(),
             Value::Function { .. } => "<function>".to_string(),
             Value::ReturnValue(val) => self.value_to_string(val),

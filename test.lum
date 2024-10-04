@@ -1,17 +1,22 @@
-# Berechnung der Fibonacci-Zahl
-def fib(n):
-    if n <= 1:
-        return n
-    else:
-        return fib(n - 1) + fib(n - 2)
+# Definiere eine Liste
+numbers = [1, 2, 3, 4, 5]
+print(numbers)
 
-# Ausgabe der 10. Fibonacci-Zahl
-print("Die 10. Fibonacci-Zahl ist:")
-print(fib(10))
+# Definiere ein Tupel
+coordinates = (10, 20, 30)
+print(coordinates)
 
-x = "Hallo "
-y = "Welt"
-print(x + y)
+# Liste innerhalb eines Tupels
+mixed = ([1, 2], (3, 4), "Hallo")
+print(mixed)
 
-if True and not False:
-    print("Bedingung ist wahr")
+# Kombinierte Operationen
+numbers = numbers + [6, 7]
+print(numbers)
+
+# Verwendung in Funktionen
+def create_tuple(a, b, c):
+    return (a, b, c)
+
+result = create_tuple(5, 10, 15)
+print(result)

@@ -20,10 +20,12 @@ pub enum Token {
     Assign,
     LeftParen,
     RightParen,
-    Comma,
+    LeftBracket,    // Hinzugefügt: LeftBracket für Listen
+    RightBracket,   // Hinzugefügt: RightBracket für Listen
+    Comma,          // Bereits vorhanden, kann für Listen und Tupel genutzt werden
     Colon,
     Newline,
-    Indent,   // Hinzugefügt: Indent-Token
-    Dedent,   // Hinzugefügt: Dedent-Token
+    Indent,
+    Dedent,
     EOF,
 }
